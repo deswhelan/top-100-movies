@@ -1,32 +1,22 @@
-from bs4 import BeautifulSoup
-from operator import attrgetter
 import requests
+from bs4 import BeautifulSoup
 
-class Article:
-    def __init__(self, title, link, upvotes):
-        self.title = title
-        self.link = link
-        self.upvotes = upvotes
+URL = "https://web.archive.org/web/20200518073855/https://www.empireonline.com/movies/features/best-movies-2/"
 
-# Scrape site for desired data
-response = requests.get("https://appbrewery.github.io/news.ycombinator.com/")
+# Scrape movie ranking data
+response = requests.get(URL)
 response.raise_for_status()
 soup = BeautifulSoup(response.text, "html.parser")
-articles = soup.find_all(class_="storylink")
-article_upvotes = soup.find_all(class_="score")
 
-# Create list of refined article data
-refined_articles = []
-for i, article in enumerate(articles):
-    title = article.get_text()
-    link = article["href"]
-    # Convert upvote strings to usable ints
-    upvotes = int(article_upvotes[i].get_text().split(" ")[0])
+# Handle/organise movie ranking data
+movie_synopses = soup.find_all(class_="article-title-description__text")
 
-    refined_article = Article(title, link, upvotes)
+best_100_movies = [movie_synopsis.find(class_="title").get_text() for movie_synopsis in movie_synopses]
 
-    refined_articles.append(refined_article)
+# The site ranks the movies from 100 down to 1; we want it from 1 to 100
+best_100_movies.reverse()
 
-most_upvoted_article = max(refined_articles, key=attrgetter("upvotes"))
-print(most_upvoted_article.title)
-print(most_upvoted_article.link)
+# Save ranking to text file
+with open("./movies.txt", "w", encoding='utf-8') as movie_file:
+    for movie in best_100_movies:
+        movie_file.write(f"{movie}\n")
