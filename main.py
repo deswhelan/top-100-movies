@@ -13,10 +13,19 @@ movie_synopses = soup.find_all(class_="article-title-description__text")
 
 best_100_movies = [movie_synopsis.find(class_="title").get_text() for movie_synopsis in movie_synopses]
 
+# handle special case/typo in source data
+for i, movie_title in enumerate(best_100_movies):
+    if "12: " in movie_title:
+        best_100_movies[i] = movie_title.replace("12: ", "12) ")
+
 # The site ranks the movies from 100 down to 1; we want it from 1 to 100
 best_100_movies.reverse()
 
+# Remove "magic string" ranking number from movie title
+for i, movie_title in enumerate(best_100_movies):
+    best_100_movies[i] = movie_title.split(") ")[1]
+
 # Save ranking to text file
 with open("./movies.txt", "w", encoding='utf-8') as movie_file:
-    for movie in best_100_movies:
-        movie_file.write(f"{movie}\n")
+    for i, movie_title in enumerate(best_100_movies):
+        movie_file.write(f"{i+1}) {movie_title}\n")
