@@ -28,4 +28,5 @@ for i, article in enumerate(articles):
     refined_articles.append(refined_article)
 
 most_upvoted_article = max(refined_articles, key=attrgetter("upvotes"))
-print("Most upvoted article: ", most_upvoted_article.title, "\n")
+print(most_upvoted_article.title)
+print(most_upvoted_article.link)
